@@ -1,0 +1,12 @@
+applications:
+  - name: mfilestest
+    path: .
+    buildpacks:
+      - nodejs_buildpack
+    memory: 256M
+    command: npm run start:prod
+    random-route: true
+    services:
+      - connectivity_service
+      - destination_service
+      - xsuaa_service
