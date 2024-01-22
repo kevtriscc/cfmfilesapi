@@ -11,10 +11,6 @@ export class MfilesController {
     try {
       const pdfBuffer = await this.mfilesService.getPDFBuffer()
       res.setHeader('Content-Type', 'application/pdf')
-      res.setHeader(
-        'Content-Disposition',
-        'attachment; filename="download.pdf"',
-      )
       res.status(HttpStatus.OK).send(pdfBuffer)
     } catch (error) {
       res
