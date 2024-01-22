@@ -1,17 +1,25 @@
-import { Controller, Get } from '@nestjs/common';
-import { MfilesService } from './mfiles.service';
+import { Controller, Get, Res, HttpStatus } from '@nestjs/common'
+import { Response } from 'express'
+import { MfilesService } from './mfiles.service'
 
 @Controller('mfiles')
 export class MfilesController {
   constructor(private readonly mfilesService: MfilesService) {}
 
-  @Get('auth')
-  async auth(): Promise<string> {
-    return this.mfilesService.auth();
-  }
-
-  @Get('auth-test')
-  async authTest(): Promise<string> {
-    return this.mfilesService.authTest();
+  @Get('pdf')
+  async getPDF(@Res() res: Response) {
+    try {
+      const pdfBuffer = await this.mfilesService.getPDFBuffer()
+      res.setHeader('Content-Type', 'application/pdf')
+      res.setHeader(
+        'Content-Disposition',
+        'attachment; filename="download.pdf"',
+      )
+      res.status(HttpStatus.OK).send(pdfBuffer)
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Fehler beim Abrufen der PDF')
+    }
   }
 }

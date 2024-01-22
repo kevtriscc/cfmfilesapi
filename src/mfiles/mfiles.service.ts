@@ -1,103 +1,75 @@
-import { Injectable } from '@nestjs/common';
-import { getDestinationFromDestinationService } from '@sap-cloud-sdk/connectivity';
-import axios from 'axios';
+import {
+  Injectable,
+  OnModuleInit,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common'
+import {
+  Destination,
+  getDestinationFromDestinationService,
+} from '@sap-cloud-sdk/connectivity'
+import axios, { AxiosRequestConfig } from 'axios'
 
 @Injectable()
-export class MfilesService {
-  async authTest(): Promise<string> {
-    const destToMFiles = await getDestinationFromDestinationService({
-      destinationName: 'DestinationToMFilesAPI',
-    });
+export class MfilesService implements OnModuleInit {
+  private destination: Destination
+  private axiosConfig: AxiosRequestConfig
 
-    // const config = {
-    //   headers: {
-    //     ...destToMFiles.proxyConfiguration.headers,
-    //   },
-    //   proxy: {
-    //     host: destToMFiles.proxyConfiguration.host,
-    //     port: destToMFiles.proxyConfiguration.port,
-    //   },
-    // };
+  async onModuleInit(): Promise<void> {
+    this.destination = await getDestinationFromDestinationService({
+      destinationName: 'DestinationToMFilesPROD_API',
+    })
 
-    const { url: targetUrl } = destToMFiles;
-    // const vaultGuid = `C774160-B0F3-4EFF-879D-451A8934377E`;
-    // let path = `${targetUrl}/WebServiceSSO.aspx?popup=1&vault=${vaultGuid}`;
-
-    try {
-      const config = {
-        headers: {
-          ...destToMFiles.proxyConfiguration.headers,
-        },
-        proxy: {
-          host: destToMFiles.proxyConfiguration.host,
-          port: destToMFiles.proxyConfiguration.port,
-        },
-      };
-
-      await axios.get(
-        `${targetUrl}/REST/server/authenticationprotocols.aspx`,
-        config,
-      );
-
-      // const response = await axios.post(path, null, config);
-      // // handle response
-      // console.log(response.data);
-      // path = '';
-      debugger;
-    } catch (error) {
-      // handle error
-      debugger;
-      console.error(error);
-    }
-
-    return '';
-
-    // return axios
-    //   .post(path, null, config)
-    //   .then((response) => {
-    //     console.log('Worked _callOnPrem');
-    //     path = '';
-    //     return response.data;
-    //   })
-    //   .catch((error) => {
-    //     console.error('Failed: _callOnPrem');
-    //     console.error(error);
-    //     debugger;
-    //   });
-  }
-
-  async auth(): Promise<string> {
-    const destToMFiles = await getDestinationFromDestinationService({
-      destinationName: 'DestinationToMFilesAPI',
-    });
-
-    const config = {
+    this.axiosConfig = {
       headers: {
-        ...destToMFiles.proxyConfiguration.headers,
+        ...this.destination.proxyConfiguration.headers,
+        'SAP-Connectivity-SCC-Location_ID':
+          this.destination.cloudConnectorLocationId,
       },
       proxy: {
-        host: destToMFiles.proxyConfiguration.host,
-        port: destToMFiles.proxyConfiguration.port,
+        host: this.destination.proxyConfiguration.host,
+        port: this.destination.proxyConfiguration.port,
       },
-    };
+    }
+  }
 
-    const { url: targetUrl } = destToMFiles;
-    const path = `${targetUrl}/m-files/REST/server/authenticationtokens`;
+  async getPDFBuffer(): Promise<Buffer> {
+    try {
+      const token = await this.authenticate()
+      return await this.downloadPDF(token)
+    } catch (error) {
+      console.error(error)
+      throw new HttpException(
+        'Fehler beim Abrufen der PDF',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  private async authenticate(): Promise<string> {
+    const path = `${this.destination.url}/m-files/REST/server/authenticationtokens`
     const body = {
-      Username: 'DMC_ReadOnly_User',
+      Username: 'dmc-test-user',
       Password: 'Init_cent12345',
-      VaultGuid: 'C774160-B0F3-4EFF-879D-451A8934377E',
-    };
+      VaultGuid: 'A508E2D0-1A44-4D33-B7B7-92BEC9D85D70',
+    }
 
-    return axios
-      .post(path, body, config)
-      .then((response) => {
-        console.log('Worked _callOnPrem');
-        return response.data;
-      })
-      .catch(() => {
-        console.error('Failed: _callOnPrem');
-        debugger;
-      });
+    const response = await axios.post(path, body, this.axiosConfig)
+    return response.data.Value
+  }
+
+  private async downloadPDF(token: string): Promise<Buffer> {
+    const config: AxiosRequestConfig = {
+      ...this.axiosConfig,
+      headers: {
+        ...this.axiosConfig.headers,
+        'X-Authentication': token,
+      },
+      responseType: 'arraybuffer', 
+    }
+    const fileUrl = `${this.destination.url}/m-files/REST/objects/0/41591/7/files/46873/content`
+
+    const response = await axios.get(fileUrl, config)
+    return response.data
   }
 }
