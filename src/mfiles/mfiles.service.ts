@@ -36,7 +36,52 @@ export class MfilesService implements OnModuleInit {
   async getPDFBuffer(): Promise<Buffer> {
     try {
       const token = await this.authenticate()
+      const testWithoutKeyResponse = await this.testWithoutKey()
+      const testWithKeyResponse = await this.testWithKey(token)
       return await this.downloadPDF(token)
+    } catch (error) {
+      console.error(error)
+      throw new HttpException(
+        'Fehler beim Abrufen der PDF',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  private async testWithKey(token: string) {
+    try {
+      const config: AxiosRequestConfig = {
+        ...this.axiosConfig,
+        headers: {
+          ...this.axiosConfig.headers,
+          'X-Authentication': token,
+        },
+      }
+      const url = `${this.destination.url}/m-files/REST/server/authenticationprotocols`
+
+      const response = await axios.get(url, config)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      throw new HttpException(
+        'Fehler beim Abrufen der PDF',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  private async testWithoutKey() {
+    try {
+      const config: AxiosRequestConfig = {
+        ...this.axiosConfig,
+        headers: {
+          ...this.axiosConfig.headers,
+        },
+      }
+      const url = `${this.destination.url}/m-files/REST/server/authenticationprotocols`
+
+      const response = await axios.get(url, config)
+      return response.data
     } catch (error) {
       console.error(error)
       throw new HttpException(
@@ -65,7 +110,7 @@ export class MfilesService implements OnModuleInit {
         ...this.axiosConfig.headers,
         'X-Authentication': token,
       },
-      responseType: 'arraybuffer', 
+      responseType: 'arraybuffer',
     }
     const fileUrl = `${this.destination.url}/m-files/REST/objects/0/41591/7/files/46873/content`
 
