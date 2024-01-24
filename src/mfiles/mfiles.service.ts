@@ -12,7 +12,6 @@ import axios, { AxiosRequestConfig } from 'axios'
 
 @Injectable()
 export class MfilesService implements OnModuleInit {
-  
   private destination: Destination
   private axiosConfig: AxiosRequestConfig
 
@@ -47,7 +46,7 @@ export class MfilesService implements OnModuleInit {
     }
   }
 
-  async searchObject(): Promise<Buffer>{
+  async searchObject(): Promise<Buffer> {
     try {
       const token = await this.authenticate()
       return await this.getObject(token)
@@ -96,13 +95,20 @@ export class MfilesService implements OnModuleInit {
       },
       params: {
         q: '9370',
-        p1408: '(MM) Work Instruction'
+        // 'p1408**': '(MM) Work Instruction',
       },
       responseType: 'arraybuffer',
     }
     var searchUrl = `${this.destination.url}/m-files/REST/objects`
-
-    const response = await axios.get(searchUrl, config)
-    return response.data
+    try {
+      const response = await axios.get(searchUrl, config)
+      return response.data
+    } catch (error) {
+      console.error(error)
+      throw new HttpException(
+        'Fehler bei der Suche',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
   }
 }
