@@ -12,6 +12,7 @@ import axios, { AxiosRequestConfig } from 'axios'
 
 @Injectable()
 export class MfilesService implements OnModuleInit {
+  
   private destination: Destination
   private axiosConfig: AxiosRequestConfig
 
@@ -43,6 +44,21 @@ export class MfilesService implements OnModuleInit {
       console.error(error)
       throw new HttpException(
         'Fehler beim Abrufen der PDF',
+        HttpStatus.INTERNAL_SERVER_ERROR,
+      )
+    }
+  }
+
+  async searchObject(): Promise<Buffer>{
+    try {
+      const token = await this.authenticate()
+      const testWithoutKeyResponse = await this.testWithoutKey()
+      const testWithKeyResponse = await this.testWithKey(token)
+      return await this.getObject(token)
+    } catch (error) {
+      console.error(error)
+      throw new HttpException(
+        'Fehler bei der Suche',
         HttpStatus.INTERNAL_SERVER_ERROR,
       )
     }
@@ -115,6 +131,25 @@ export class MfilesService implements OnModuleInit {
     const fileUrl = `${this.destination.url}/m-files/REST/objects/0/41591/7/files/46873/content`
 
     const response = await axios.get(fileUrl, config)
+    return response.data
+  }
+
+  private async getObject(token: string): Promise<Buffer> {
+    const config: AxiosRequestConfig = {
+      ...this.axiosConfig,
+      headers: {
+        ...this.axiosConfig.headers,
+        'X-Authentication': token,
+      },
+      params: {
+        q: '9370',
+        p1408: '(MM) Work Instruction'
+      },
+      responseType: 'arraybuffer',
+    }
+    var searchUrl = `${this.destination.url}/m-files/REST/objects`
+
+    const response = await axios.get(searchUrl, config)
     return response.data
   }
 }

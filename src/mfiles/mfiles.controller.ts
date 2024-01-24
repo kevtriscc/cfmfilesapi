@@ -18,4 +18,18 @@ export class MfilesController {
         .send('Fehler beim Abrufen der PDF')
     }
   }
+
+
+  @Get('searchObject')
+  async searchObject(@Res() res: Response) {
+    try {
+      const objBuffer = await this.mfilesService.searchObject()
+      res.setHeader('Content-Type', 'application/json')
+      res.status(HttpStatus.OK).send(objBuffer)
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send('Fehler beim Abrufen der PDF')
+    }
+  }
 }
