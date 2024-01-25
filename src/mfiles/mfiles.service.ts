@@ -33,27 +33,13 @@ export class MfilesService implements OnModuleInit {
     }
   }
 
-  async getPDFBuffer(): Promise<Buffer> {
+  async getPDFBuffer(q: string, p39: string, p1408: string): Promise<Buffer> {
     try {
       const token = await this.authenticate()
-      return await this.downloadPDF(token)
+      return await this.downloadPDF(token, q, p39, p1408)
     } catch (error) {
-      console.error(error)
       throw new HttpException(
-        'Fehler beim Abrufen der PDF',
-        HttpStatus.INTERNAL_SERVER_ERROR,
-      )
-    }
-  }
-
-  async searchObject(): Promise<Buffer> {
-    try {
-      const token = await this.authenticate()
-      return await this.getObject(token)
-    } catch (error) {
-      console.error(error)
-      throw new HttpException(
-        'Fehler bei der Suche',
+        `Error fetching PDF: ${error}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       )
     }
@@ -71,7 +57,23 @@ export class MfilesService implements OnModuleInit {
     return response.data.Value
   }
 
-  private async downloadPDF(token: string): Promise<Buffer> {
+  private async downloadPDF(
+    token: string,
+    q: string,
+    p39: string,
+    p1408: string,
+  ): Promise<Buffer> {
+    const documentObject = await this.getObject(token, q, p39, p1408)
+    const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
+
+    if (documentObjectJson.Items.length !== 1) {
+      throw new HttpException(`${documentObjectJson.Items.length} documents found. Change workinstruction search parameter to find exactly one document.`, HttpStatus.BAD_REQUEST);
+    }
+    const firstItem = documentObjectJson.Items[0]
+    const version = firstItem.ObjVer.Version
+    const objVerId = firstItem.ObjVer.ID
+    const fileId = firstItem.Files.length > 0 ? firstItem.Files[0].ID : null
+
     const config: AxiosRequestConfig = {
       ...this.axiosConfig,
       headers: {
@@ -80,13 +82,17 @@ export class MfilesService implements OnModuleInit {
       },
       responseType: 'arraybuffer',
     }
-    const fileUrl = `${this.destination.url}/m-files/REST/objects/0/41591/7/files/46873/content`
-
+    const fileUrl = `${this.destination.url}/m-files/REST/objects/0/${objVerId}/${version}/files/${fileId}/content`
     const response = await axios.get(fileUrl, config)
     return response.data
   }
 
-  private async getObject(token: string): Promise<Buffer> {
+  private async getObject(
+    token: string,
+    q: string,
+    p39: string,
+    p1408: string,
+  ): Promise<Buffer> {
     const config: AxiosRequestConfig = {
       ...this.axiosConfig,
       headers: {
@@ -94,8 +100,9 @@ export class MfilesService implements OnModuleInit {
         'X-Authentication': token,
       },
       params: {
-        q: '9370',
-        // 'p1408**': '(MM) Work Instruction',
+        q: q,
+        p39: p39,
+        p1408: p1408,
       },
       responseType: 'arraybuffer',
     }
@@ -106,7 +113,7 @@ export class MfilesService implements OnModuleInit {
     } catch (error) {
       console.error(error)
       throw new HttpException(
-        'Fehler bei der Suche',
+        `Error in document serach: ${error}`,
         HttpStatus.INTERNAL_SERVER_ERROR,
       )
     }
