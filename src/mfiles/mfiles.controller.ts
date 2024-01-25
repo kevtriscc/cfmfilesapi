@@ -15,7 +15,7 @@ export class MfilesController {
     } catch (error) {
       res
         .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send('Fehler beim Abrufen der PDF')
+        .send(error.response)
     }
   }
 }
