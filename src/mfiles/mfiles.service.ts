@@ -7,6 +7,34 @@ import axios, { AxiosRequestConfig } from 'axios'
 
 @Injectable()
 export class MfilesService {
+
+//Check if User is trained on document
+  async getUserTrainingInfo(dmUser: string): Promise<string> {
+    const { destination, axiosConfig } = await this.getDestinationAndConfig()
+    const token = await this.authenticate(destination, axiosConfig)
+    const mFilesUserId = await this.getMFilesUserID(token, axiosConfig, destination, dmUser)
+
+    return `{ "isTrained": true }`
+  }
+
+  private async getMFilesUserID(token: string, axiosConfig: AxiosRequestConfig, destination: Destination, dmUser: string): Promise<string> {
+    const config: AxiosRequestConfig = {
+      ...axiosConfig,
+      headers: {
+        ...axiosConfig.headers,
+        'X-Authentication': token,
+      },
+      params: {
+        p1024: dmUser
+      },
+      responseType: 'json',
+    }
+    const getUserIDUrl = `${destination.url}/m-files/REST/objects/102`
+    const response = await axios.get(getUserIDUrl, config)
+    return response.data
+  }
+
+//Get PDF File
   async getPDFBuffer(q: string, p39: string, p1408: string): Promise<Buffer> {
     try {
       const { destination, axiosConfig } = await this.getDestinationAndConfig()
