@@ -18,4 +18,17 @@ export class MfilesController {
         .send(error.response)
     }
   }
+
+  @Get('training') 
+  async getUserTrainedInfo(@Res() res: Response, @Query('user') dmUser: string) {
+    try {
+      const userTrainingInfo = await this.mfilesService.getUserTrainingInfo(dmUser)
+      res.setHeader('Content-Type', 'application/json')
+      res.status(HttpStatus.OK).send(userTrainingInfo)
+    } catch (error) {
+      res
+        .status(HttpStatus.INTERNAL_SERVER_ERROR)
+        .send(error.response)
+    }
+  }
 }

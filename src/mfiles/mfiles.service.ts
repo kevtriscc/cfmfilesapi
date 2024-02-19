@@ -33,6 +33,45 @@ export class MfilesService implements OnModuleInit {
     }
   }
 
+  //Authenticate to M-Files
+  private async authenticate(): Promise<string> {
+    const path = `${this.destination.url}/m-files/REST/server/authenticationtokens`
+    const body = {
+      Username: 'dmc-test-user',
+      Password: 'Init_cent12345',
+      VaultGuid: 'A508E2D0-1A44-4D33-B7B7-92BEC9D85D70',
+    }
+
+    const response = await axios.post(path, body, this.axiosConfig)
+    return response.data.Value
+  }
+
+//Check if User is trained on document
+  async getUserTrainingInfo(dmUser: string): Promise<string> {
+    const token = await this.authenticate()
+    const mFilesUserId = await this.getMFilesUserID(token, dmUser)
+
+    return `{ "isTrained": true }`
+  }
+
+  private async getMFilesUserID(token: string, dmUser: string): Promise<string> {
+    const config: AxiosRequestConfig = {
+      ...this.axiosConfig,
+      headers: {
+        ...this.axiosConfig.headers,
+        'X-Authentication': token,
+      },
+      params: {
+        p1024: dmUser
+      },
+      responseType: 'json',
+    }
+    const getUserIDUrl = `${this.destination.url}/m-files/REST/objects/102`
+    const response = await axios.get(getUserIDUrl, config)
+    return response.data
+  }
+
+//Get PDF File
   async getPDFBuffer(q: string, p39: string, p1408: string): Promise<Buffer> {
     try {
       const token = await this.authenticate()
@@ -45,17 +84,7 @@ export class MfilesService implements OnModuleInit {
     }
   }
 
-  private async authenticate(): Promise<string> {
-    const path = `${this.destination.url}/m-files/REST/server/authenticationtokens`
-    const body = {
-      Username: 'dmc-test-user',
-      Password: 'Init_cent12345',
-      VaultGuid: 'A508E2D0-1A44-4D33-B7B7-92BEC9D85D70',
-    }
-
-    const response = await axios.post(path, body, this.axiosConfig)
-    return response.data.Value
-  }
+  
 
   private async downloadPDF(
     token: string,
@@ -106,7 +135,7 @@ export class MfilesService implements OnModuleInit {
       },
       responseType: 'arraybuffer',
     }
-    var searchUrl = `${this.destination.url}/m-files/REST/objects`
+    var searchUrl = `${this.destination.url}/m-files/REST/objects/0`
     try {
       const response = await axios.get(searchUrl, config)
       return response.data
