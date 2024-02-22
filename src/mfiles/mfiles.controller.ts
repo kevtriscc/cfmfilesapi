@@ -20,9 +20,9 @@ export class MfilesController {
   }
 
   @Get('training') 
-  async getUserTrainedInfo(@Res() res: Response, @Query('user') dmUser: string) {
+  async getUserTrainedInfo(@Res() res: Response, @Query('username') dmUser: string, @Query('q') q: string, @Query('p39') p39: string, @Query('p1408') p1408: string) {
     try {
-      const userTrainingInfo = await this.mfilesService.getUserTrainingInfo(dmUser)
+      const userTrainingInfo = await this.mfilesService.getUserTrainingInfo(dmUser, q, p39, p1408)
       res.setHeader('Content-Type', 'application/json')
       res.status(HttpStatus.OK).send(userTrainingInfo)
     } catch (error) {
