@@ -1,27 +1,36 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common'
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
 import {
   Destination,
   getDestinationFromDestinationService,
 } from '@sap-cloud-sdk/connectivity'
 import axios, { AxiosRequestConfig } from 'axios'
-import { DocumentObject, MFilesUserInformation } from 'src/types/mfiles.interfaces'
+import {
+  DocumentObject,
+  MFilesUserInformation,
+} from 'src/types/mfiles.interfaces'
 
 @Injectable()
 export class MfilesService {
-
-  
-
-//Check if User is trained on document
-  async getUserTrainingInfo(dmUser: string, q: string, p39: string, p1408: string): Promise<object> {
-    
+  //Check if User is trained on document
+  async getUserTrainingInfo(
+    dmUser: string,
+    q: string,
+    p39: string,
+    p1408: string,
+  ): Promise<object> {
     if (!dmUser) {
-      return { "error": "No username provided!"}
+      return { error: 'No username provided!' }
     }
 
     const { destination, axiosConfig } = await this.getDestinationAndConfig()
     const token = await this.authenticate(destination, axiosConfig)
-    const mFilesUserInformation = await this.getMFilesUserInfo(token, axiosConfig, destination, dmUser)
-    const userId = mFilesUserInformation.Items[0].DisplayID;
+    const mFilesUserInformation = await this.getMFilesUserInfo(
+      token,
+      axiosConfig,
+      destination,
+      dmUser,
+    )
+    const userId = mFilesUserInformation.Items[0].DisplayID
 
     //get ID of document
     const documentObject = await this.getObject(
@@ -33,21 +42,32 @@ export class MfilesService {
       axiosConfig,
     )
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
-    this.checkIfOnlyOneObjectFound(documentObjectJson)
+    await this.checkIfOnlyOneObjectFound(documentObjectJson)
 
-    const documentId = documentObjectJson.Items[0].DisplayID;
+    const documentId = documentObjectJson.Items[0].DisplayID
 
-    const userIsTrained = await this.checkTraining(userId, documentId, token, destination, axiosConfig)
+    const userIsTrained = await this.checkTraining(
+      userId,
+      documentId,
+      token,
+      destination,
+      axiosConfig,
+    )
 
-    const resultBody = {
-      "userId": userId,
-      "documentId": documentId,
-      "isTrained": userIsTrained
+    return {
+      userId: userId,
+      documentId: documentId,
+      isTrained: userIsTrained,
     }
-
-    return resultBody
   }
-  private async checkTraining(userId: string, documentId: any, token: string, destination: Destination, axiosConfig: AxiosRequestConfig) {
+
+  private async checkTraining(
+    userId: string,
+    documentId: any,
+    token: string,
+    destination: Destination,
+    axiosConfig: AxiosRequestConfig,
+  ) {
     const config: AxiosRequestConfig = {
       ...axiosConfig,
       headers: {
@@ -61,19 +81,22 @@ export class MfilesService {
       responseType: 'json',
     }
     const checkTrainingUrl = `${destination.url}/m-files/REST/objects/120`
-    const response = await axios.get(checkTrainingUrl, config)
-
+    await axios.get(checkTrainingUrl, config)
     //TODO: analyse data once examples are here from Dimitar, tow for testing Dimitar is always trained, all other are not
 
-    if (userId == "248") {
+    if (userId == '248') {
       return true
-    }
-    else {
+    } else {
       return false
     }
   }
 
-  private async getMFilesUserInfo(token: string, axiosConfig: AxiosRequestConfig, destination: Destination, dmUser: string): Promise<MFilesUserInformation> {
+  private async getMFilesUserInfo(
+    token: string,
+    axiosConfig: AxiosRequestConfig,
+    destination: Destination,
+    dmUser: string,
+  ): Promise<MFilesUserInformation> {
     const config: AxiosRequestConfig = {
       ...axiosConfig,
       headers: {
@@ -81,7 +104,7 @@ export class MfilesService {
         'X-Authentication': token,
       },
       params: {
-        p1026: dmUser
+        p1026: dmUser,
       },
       responseType: 'json',
     }
@@ -90,7 +113,7 @@ export class MfilesService {
     return response.data
   }
 
-//Get PDF File
+  //Get PDF File
   async getPDFBuffer(q: string, p39: string, p1408: string): Promise<Buffer> {
     try {
       const { destination, axiosConfig } = await this.getDestinationAndConfig()
@@ -167,7 +190,7 @@ export class MfilesService {
     )
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
 
-    await this.checkIfOnlyOneObjectFound(documentObjectJson);
+    await this.checkIfOnlyOneObjectFound(documentObjectJson)
 
     const firstItem = documentObjectJson.Items[0]
     const version = firstItem.ObjVer.Version
@@ -186,7 +209,6 @@ export class MfilesService {
     const response = await axios.get(fileUrl, config)
     return response.data
   }
-
 
   private async getObject(
     token: string,
@@ -209,7 +231,7 @@ export class MfilesService {
       },
       responseType: 'arraybuffer',
     }
-    var searchUrl = `${destination.url}/m-files/REST/objects`
+    const searchUrl = `${destination.url}/m-files/REST/objects`
     try {
       const response = await axios.get(searchUrl, config)
       return response.data
