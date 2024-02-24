@@ -11,4 +11,5 @@ applications:
     services:
       - connectivity_service
       - destination_service
-      - xsuaa_service
+      - uaa_ExampleCustomCorePluginsMTA
+      # - xsuaa_service
