@@ -1,0 +1,15 @@
+{
+    "authenticationMethod": "route",
+    "routes": [
+        {
+            "source": "^/mfiles",
+            "target": "/",
+            "destination": "mfiles-destination"
+        },
+        {
+            "source": "^/user-api(.*)",
+            "target": "$1",
+            "service": "sap-approuter-userapi"
+        }
+    ]
+}

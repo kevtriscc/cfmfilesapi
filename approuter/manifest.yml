@@ -1,0 +1,21 @@
+applications:
+  - name: approuter
+    routes:
+      - route: mfiles-approuter.cfapps.eu20-001.hana.ondemand.com
+    path: .
+    memory: 128M
+    buildpacks:
+      - nodejs_buildpack
+    env:
+      destinations: '[{"name":"mfiles-destination","url":"https://mfiles.cfapps.eu20-001.hana.ondemand.com","forwardAuthToken": true}]'
+      CORS: '[{"uriPattern": "^(.*)$","allowedOrigin": [
+        {"host": "ce-dmc-test-jegq84ya.test.execution.eu20.dmc.cloud.sap","protocol": "https"}],
+        "allowedMethods": ["GET","OPTIONS"],
+        "allowedHeaders":["Origin", "Accept","X-Requested-With","Content-Type",
+        "Access-Control-Request-Method","Access-Control-Request-Headers","Authorization",
+        "X-Sap-Cid","X-Csrf-Token","x-dme-plant","x-dme-industry-type","x-features"],
+        "exposeHeaders": ["Accept","Authorization","X-Requested-With","X-Sap-Cid",
+        "Access-Control-Allow-Origin","Access-Control-Allow-Credentials","X-Csrf-Token",
+        "Content-Type","x-dme-plant","x-dme-industry-type","x-features"]}]'
+    services:
+      - xsuaa_service
