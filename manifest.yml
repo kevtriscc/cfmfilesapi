@@ -1,9 +1,11 @@
 applications:
-  - name: testmfiles
+  - name: mfiles-middleware
     path: .
     buildpacks:
       - nodejs_buildpack
-    memory: 256M
+    memory: 128M
+    routes:
+      - route: mfiles.cfapps.eu20-001.hana.ondemand.com
     command: npm run start:prod
     random-route: true
     services:
