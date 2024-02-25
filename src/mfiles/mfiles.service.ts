@@ -81,7 +81,7 @@ export class MfilesService {
       responseType: 'json',
     }
     const checkTrainingUrl = `${destination.url}/m-files/REST/objects/120`
-    await axios.get(checkTrainingUrl, config)
+    const response = await axios.get(checkTrainingUrl, config)
     //TODO: analyse data once examples are here from Dimitar, tow for testing Dimitar is always trained, all other are not
 
     if (userId == '248') {
