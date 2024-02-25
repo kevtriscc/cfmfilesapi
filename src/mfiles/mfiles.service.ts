@@ -77,6 +77,7 @@ export class MfilesService {
       params: {
         p1021: userId,
         p1224: documentId,
+        q: '4005'
       },
       responseType: 'json',
     }
