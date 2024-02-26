@@ -8,6 +8,7 @@ import axios, { AxiosRequestConfig } from 'axios'
 import mfilesConfig from 'src/config/mfiles.config'
 import {
   DocumentObject,
+  MFilesObjectType,
   MFilesUserInformation,
 } from 'src/types/mfiles.interfaces'
 
@@ -37,7 +38,11 @@ export class MfilesService {
       destination,
       dmUser,
     )
-    const userId = mFilesUserInformation.Items[0].DisplayID
+    if (mFilesUserInformation.Items.length == 0)
+    {
+      return { error: `M-Files user not found for ${dmUser}`}
+    }
+    const userId = mFilesUserInformation.Items[0].ObjVer.ID
 
     //get ID of document
     const documentObject = await this.getObject(
@@ -51,7 +56,7 @@ export class MfilesService {
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
     await this.checkIfOnlyOneObjectFound(documentObjectJson)
 
-    const documentId = documentObjectJson.Items[0].DisplayID
+    const documentId = documentObjectJson.Items[0].ObjVer.ID
 
     const userIsTrained = await this.checkTraining(
       userId,
@@ -83,20 +88,18 @@ export class MfilesService {
       },
       params: {
         p1021: userId,
-        p1224: documentId,
-        q: '4005',
+        p1483: documentId,
+        p39: '132,267',
       },
       responseType: 'json',
     }
     const checkTrainingUrl = `${destination.url}/m-files/REST/objects/120`
-    const response = await axios.get(checkTrainingUrl, config)
-    //TODO: analyse data once examples are here from Dimitar, tow for testing Dimitar is always trained, all other are not
-
-    if (userId == '248') {
-      return true
-    } else {
-      return false
-    }
+    const trainingDataResponse: MFilesObjectType = await axios.get(
+      checkTrainingUrl,
+      config,
+    )
+    //When a training data is returned, return true
+    return trainingDataResponse.data.Items.length > 0
   }
 
   private async getMFilesUserInfo(
