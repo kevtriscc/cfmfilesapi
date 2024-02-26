@@ -4,10 +4,10 @@ import { JWTStrategy } from '@sap/xssec'
 import { getServices } from '@sap/xsenv'
 import * as passport from 'passport'
 
-const xsuaa = getServices({
-  xsuaa: { name: 'uaa_ExampleCustomCorePluginsMTA' },
-}).xsuaa
-passport.use(new JWTStrategy(xsuaa))
+// const xsuaa = getServices({
+//   xsuaa: { name: 'uaa_ExampleCustomCorePluginsMTA' },
+// }).xsuaa
+// passport.use(new JWTStrategy(xsuaa))
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)

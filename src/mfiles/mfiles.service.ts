@@ -1,9 +1,11 @@
-import { HttpException, HttpStatus, Injectable } from '@nestjs/common'
+import { HttpException, HttpStatus, Inject, Injectable } from '@nestjs/common'
+import { ConfigType } from '@nestjs/config'
 import {
   Destination,
   getDestinationFromDestinationService,
 } from '@sap-cloud-sdk/connectivity'
 import axios, { AxiosRequestConfig } from 'axios'
+import mfilesConfig from 'src/config/mfiles.config'
 import {
   DocumentObject,
   MFilesUserInformation,
@@ -11,6 +13,11 @@ import {
 
 @Injectable()
 export class MfilesService {
+  constructor(
+    @Inject(mfilesConfig.KEY)
+    private config: ConfigType<typeof mfilesConfig>,
+  ) {}
+
   //Check if User is trained on document
   async getUserTrainingInfo(
     dmUser: string,
@@ -77,7 +84,7 @@ export class MfilesService {
       params: {
         p1021: userId,
         p1224: documentId,
-        q: '4005'
+        q: '4005',
       },
       responseType: 'json',
     }
@@ -164,9 +171,9 @@ export class MfilesService {
   ): Promise<string> {
     const path = `${destination.url}/m-files/REST/server/authenticationtokens`
     const body = {
-      Username: 'dmc-test-user',
-      Password: 'Init_cent12345',
-      VaultGuid: 'A508E2D0-1A44-4D33-B7B7-92BEC9D85D70',
+      Username: this.config.username,
+      Password: this.config.password,
+      VaultGuid: this.config.vaultGuid,
     }
 
     const response = await axios.post(path, body, axiosConfig)
