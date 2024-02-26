@@ -11,4 +11,3 @@ applications:
       - connectivity_service
       - destination_service
       - uaa_ExampleCustomCorePluginsMTA
-      # - xsuaa_service

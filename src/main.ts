@@ -8,13 +8,6 @@ const xsuaa = getServices({
   xsuaa: { name: 'uaa_ExampleCustomCorePluginsMTA' },
 }).xsuaa
 passport.use(new JWTStrategy(xsuaa))
-console.log('xsuaa')
-console.log('xsuaa')
-console.log('xsuaa')
-console.log(xsuaa)
-console.log('xsuaa')
-console.log('xsuaa')
-console.log('xsuaa')
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)

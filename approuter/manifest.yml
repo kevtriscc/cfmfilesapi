@@ -8,8 +8,8 @@ applications:
       - nodejs_buildpack
     env:
       destinations: '[{"name":"mfiles-destination","url":"https://mfiles.cfapps.eu20-001.hana.ondemand.com","forwardAuthToken": true}]'
-      CORS: '[{"uriPattern": "^(.*)$","allowedOrigin": [
-        {"host": "ce-dmc-test-jegq84ya.test.execution.eu20.dmc.cloud.sap","protocol": "https"}],
+      CORS: '[{"uriPattern": "(.*)","allowedOrigin": [
+        {"host": "*","protocol": "*"}],
         "allowedMethods": ["GET","OPTIONS"],
         "allowedHeaders":["Origin", "Accept","X-Requested-With","Content-Type",
         "Access-Control-Request-Method","Access-Control-Request-Headers","Authorization",
@@ -18,4 +18,4 @@ applications:
         "Access-Control-Allow-Origin","Access-Control-Allow-Credentials","X-Csrf-Token",
         "Content-Type","x-dme-plant","x-dme-industry-type","x-features"]}]'
     services:
-      - xsuaa_service
+      - uaa_ExampleCustomCorePluginsMTA
