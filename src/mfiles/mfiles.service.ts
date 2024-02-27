@@ -54,7 +54,7 @@ export class MfilesService {
       axiosConfig,
     )
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
-    await this.checkIfOnlyOneObjectFound(documentObjectJson)
+    await this.checkIfOnlyOneObjectFound(documentObjectJson, q)
 
     const documentId = documentObjectJson.Items[0].ObjVer.ID
 
@@ -201,7 +201,7 @@ export class MfilesService {
     )
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
 
-    await this.checkIfOnlyOneObjectFound(documentObjectJson)
+    await this.checkIfOnlyOneObjectFound(documentObjectJson, q)
 
     const firstItem = documentObjectJson.Items[0]
     const version = firstItem.ObjVer.Version
@@ -255,10 +255,10 @@ export class MfilesService {
     }
   }
 
-  private async checkIfOnlyOneObjectFound(documentObjectJson: DocumentObject) {
+  private async checkIfOnlyOneObjectFound(documentObjectJson: DocumentObject, q: String) {
     if (documentObjectJson.Items.length !== 1) {
       throw new HttpException(
-        `${documentObjectJson.Items.length} documents found. Change the search parameter of work instruction to find exactly one effective (MM) Work Instruction.`,
+        `${documentObjectJson.Items.length} documents found for search parameter ${q}. Check Work Instruction to find exactly one effective (MM) Work Instruction.`,
         HttpStatus.BAD_REQUEST,
       )
     }
