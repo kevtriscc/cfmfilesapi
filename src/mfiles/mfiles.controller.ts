@@ -27,8 +27,8 @@ export class MfilesController {
       res.status(HttpStatus.OK).send(userTrainingInfo)
     } catch (error) {
       res
-        .status(HttpStatus.INTERNAL_SERVER_ERROR)
-        .send(error.response)
+        .status(error.status)
+        .send(error)
     }
   }
 }
