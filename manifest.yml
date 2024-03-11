@@ -10,4 +10,4 @@ applications:
     services:
       - connectivity_service
       - destination_service
-      - uaa_ExampleCustomCorePluginsMTA
+      - uaa_CustomCorePluginsMTA
