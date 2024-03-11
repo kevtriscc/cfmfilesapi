@@ -5,7 +5,7 @@ applications:
       - nodejs_buildpack
     memory: 128M
     routes:
-      - route: mfiles.cfapps.eu20-001.hana.ondemand.com
+      - route: mfiles-prod.cfapps.eu20-001.hana.ondemand.com
     command: npm run start:prod
     services:
       - connectivity_service
