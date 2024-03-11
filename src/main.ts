@@ -11,7 +11,9 @@ import * as passport from 'passport'
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule)
-  app.enableCors({ origin: '*' })
+  app.enableCors({
+    origin: 'https://ce-dmc-prod-q8abbhhw.execution.eu20.dmc.cloud.sap',
+  })
   // app.use(passport.initialize())
   // app.use(passport.authenticate('JWT', { session: false }))
   await app.listen(process.env.PORT || 3000)
