@@ -7,9 +7,9 @@ export class MfilesController {
   constructor(private readonly mfilesService: MfilesService) {}
 
   @Get('pdf') 
-  async getPDF(@Res() res: Response, @Query('q') q: string, @Query('p39') p39: string, @Query('p1408') p1408: string) {
+  async getPDF(@Res() res: Response, @Query('p1119') p1119: string, @Query('p39') p39: string, @Query('p1408') p1408: string) {
     try {
-      const pdfBuffer = await this.mfilesService.getPDFBuffer(q, p39, p1408)
+      const pdfBuffer = await this.mfilesService.getPDFBuffer(p1119, p39, p1408)
       res.setHeader('Content-Type', 'application/pdf')
       res.status(HttpStatus.OK).send(pdfBuffer)
     } catch (error) {
@@ -20,9 +20,9 @@ export class MfilesController {
   }
 
   @Get('training') 
-  async getUserTrainedInfo(@Res() res: Response, @Query('username') dmUser: string, @Query('q') q: string, @Query('p39') p39: string, @Query('p1408') p1408: string) {
+  async getUserTrainedInfo(@Res() res: Response, @Query('username') dmUser: string, @Query('p1119') p1119: string, @Query('p39') p39: string, @Query('p1408') p1408: string) {
     try {
-      const userTrainingInfo = await this.mfilesService.getUserTrainingInfo(dmUser, q, p39, p1408)
+      const userTrainingInfo = await this.mfilesService.getUserTrainingInfo(dmUser, p1119, p39, p1408)
       res.setHeader('Content-Type', 'application/json')
       res.status(HttpStatus.OK).send(userTrainingInfo)
     } catch (error) {
