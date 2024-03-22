@@ -22,7 +22,7 @@ export class MfilesService {
   //Check if User is trained on document
   async getUserTrainingInfo(
     dmUser: string,
-    q: string,
+    p1119: string,
     p39: string,
     p1408: string,
   ): Promise<object> {
@@ -47,14 +47,14 @@ export class MfilesService {
     //get ID of document
     const documentObject = await this.getObject(
       token,
-      q,
+      p1119,
       p39,
       p1408,
       destination,
       axiosConfig,
     )
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
-    await this.checkIfOnlyOneObjectFound(documentObjectJson, q)
+    await this.checkIfOnlyOneObjectFound(documentObjectJson, p1119)
 
     const documentId = documentObjectJson.Items[0].ObjVer.ID
 
@@ -125,13 +125,13 @@ export class MfilesService {
   }
 
   //Get PDF File
-  async getPDFBuffer(q: string, p39: string, p1408: string): Promise<Buffer> {
+  async getPDFBuffer(p1119: string, p39: string, p1408: string): Promise<Buffer> {
     try {
       const { destination, axiosConfig } = await this.getDestinationAndConfig()
       const token = await this.authenticate(destination, axiosConfig)
       return await this.downloadPDF(
         token,
-        q,
+        p1119,
         p39,
         p1408,
         destination,
@@ -185,7 +185,7 @@ export class MfilesService {
 
   private async downloadPDF(
     token: string,
-    q: string,
+    p1119: string,
     p39: string,
     p1408: string,
     destination: Destination,
@@ -193,7 +193,7 @@ export class MfilesService {
   ): Promise<Buffer> {
     const documentObject = await this.getObject(
       token,
-      q,
+      p1119,
       p39,
       p1408,
       destination,
@@ -201,7 +201,7 @@ export class MfilesService {
     )
     const documentObjectJson = JSON.parse(documentObject.toString('utf-8'))
 
-    await this.checkIfOnlyOneObjectFound(documentObjectJson, q)
+    await this.checkIfOnlyOneObjectFound(documentObjectJson, p1119)
 
     const firstItem = documentObjectJson.Items[0]
     const version = firstItem.ObjVer.Version
@@ -223,7 +223,7 @@ export class MfilesService {
 
   private async getObject(
     token: string,
-    q: string,
+    p1119: string,
     p39: string,
     p1408: string,
     destination: Destination,
@@ -236,7 +236,7 @@ export class MfilesService {
         'X-Authentication': token,
       },
       params: {
-        q: q,
+        p1119: p1119,
         p39: p39,
         p1408: p1408,
       },
@@ -255,10 +255,10 @@ export class MfilesService {
     }
   }
 
-  private async checkIfOnlyOneObjectFound(documentObjectJson: DocumentObject, q: String) {
+  private async checkIfOnlyOneObjectFound(documentObjectJson: DocumentObject, p1119: String) {
     if (documentObjectJson.Items.length !== 1) {
       throw new HttpException(
-        `${documentObjectJson.Items.length} documents found for search parameter ${q}. Check Work Instruction to find exactly one effective (MM) Work Instruction.`,
+        `${documentObjectJson.Items.length} documents found for search parameter ${p1119}. Check Work Instruction to find exactly one effective (MM) Work Instruction.`,
         HttpStatus.BAD_REQUEST,
       )
     }
